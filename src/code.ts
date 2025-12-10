@@ -6,10 +6,13 @@
 // You can access browser APIs in the <script> tag inside "ui.html" which has a
 // full browser environment (See https://www.figma.com/plugin-docs/how-plugins-run).
 
+const { XMLParser, XMLBuilder } = require("fast-xml-parser");
+
 // This shows the HTML page in "ui.html".
 figma.showUI(__html__);
 
 let exportData: any[];
+let rootData:any;
 
 function updateSelection()
 {
@@ -18,16 +21,19 @@ function updateSelection()
     for (const node of selection) {
         // 位置やサイズを持つノード（SceneNodeなど）のみを処理
         if ('x' in node && 'width' in node) {
-            exportData.push({
-                name: node.name,
-                type: node.type,
-                x: node.x,
-                y: node.y,
-                width: node.width,
-                height: node.height
+            exportData.push({node: 
+              {
+                "name": node.name,
+                "type": node.type,
+                "x": node.x,
+                "y": node.y,
+                "width": node.width,
+                "height": node.height
+            }
             });
         }
     }
+    rootData = {"root": exportData};
     figma.ui.postMessage({ type: 'selectionChanged', num: selection.length});
 }
 updateSelection();
@@ -39,8 +45,14 @@ figma.on("selectionchange", () => {
 // message from ui
 figma.ui.onmessage =  (msg: {type: string}) => {
   if (msg.type === 'export') {
-    const jsonString = JSON.stringify(exportData, null, 2); 
-    figma.ui.postMessage({ type: 'EXPORT_REQUEST', jsonData: jsonString });
+    const converter = new XMLBuilder({
+        processEntities:false,
+        format: true,
+        ignoreAttributes: false,
+        // commentPropName: "comment"
+    });
+    const xmlString = converter.build(rootData);
+    figma.ui.postMessage({ type: 'EXPORT_REQUEST', convertedData: xmlString });
   } 
   else if (msg.type === 'EXPORT_RESPONSE') {
     console.log("exported.");

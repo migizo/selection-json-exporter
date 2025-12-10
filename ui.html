@@ -1,5 +1,5 @@
-<h2>Selection Json Exporter</h2>
-<p>Let's select SceneNode that you want to export to json, then click "export" button.</p>
+<h2>Selection Xml Exporter</h2>
+<p>Let's select SceneNode that you want to export to xml, then click "export" button.</p>
 <p id="sel-num"></p>
 <button id="export">export</button>
 <button id="cancel">cancel</button>
@@ -19,16 +19,16 @@ window.onmessage = (event) => {
     // console.log("プラグインコードからこれを受け取りました:", receivedData); // [1]
     if (receivedData.type === 'EXPORT_REQUEST') {
 
-      const jsonContent = receivedData.jsonData;
+      const convertedData = receivedData.convertedData;
 
       // データをBlobとして作成し、ダウンロードリンクを生成します。
         // （ブラウザAPIはこの iframe 内でのみ利用可能です [1]）
-        const blob = new Blob([jsonContent], { type: 'application/json' });
+        const blob = new Blob([convertedData], { type: 'application/xml' });
         const url = URL.createObjectURL(blob);
         
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'exported_nodes.json';
+        a.download = 'exported_nodes.xml';
         
         // 仮想的なクリックイベントを発火させ、ダウンロードをトリガー
         a.click();

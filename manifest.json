@@ -2,7 +2,7 @@
   "name": "selection-json-exporter",
   "id": "1561169156994030324",
   "api": "1.0.0",
-  "main": "code.js",
+  "main": "dist/code.js",
   "capabilities": [],
   "enableProposedApi": false,
   "documentAccess": "dynamic-page",
