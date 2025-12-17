@@ -9,7 +9,7 @@
 const { XMLParser, XMLBuilder } = require("fast-xml-parser");
 
 // This shows the HTML page in "ui.html".
-figma.showUI(__html__);
+figma.showUI(__html__, {width: 320, height: 320});
 
 let exportData: any[];
 let rootData:any;
