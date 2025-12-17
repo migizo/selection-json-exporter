@@ -2,15 +2,45 @@
 <p>Let's select SceneNode that you want to export to xml, then click "export" button.</p>
 <p id="sel-num"></p>
 <button id="export">export</button>
+<button id="copy">copy</button>
 <button id="cancel">cancel</button>
-<script>
+<textarea id="textarea"></textarea>
 
+<script>
 document.getElementById('export').onclick = () => {
     parent.postMessage({ pluginMessage: { type: 'export' } }, '*')
 }
 
+document.getElementById('copy').onclick = () => {
+    parent.postMessage({ pluginMessage: { type: 'copy' } }, '*')
+}
+
 document.getElementById('cancel').onclick = () => {
   parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
+}
+
+function copyToClipboard(str)
+{
+  textArea = document.getElementById('textarea');
+  textArea.value = str;
+  textArea.focus();
+  textArea.select();
+  document.execCommand('copy');
+}
+
+function exportFile(str)
+{
+  // データをBlobとして作成し、ダウンロードリンクを生成します。
+  // （ブラウザAPIはこの iframe 内でのみ利用可能です [1]）
+  const blob = new Blob([str], { type: 'application/xml' });
+  const url = URL.createObjectURL(blob);
+  
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'exported_nodes.xml';
+  
+  // 仮想的なクリックイベントを発火させ、ダウンロードをトリガー
+  a.click();
 }
 
 window.onmessage = (event) => {
@@ -19,28 +49,20 @@ window.onmessage = (event) => {
     // console.log("プラグインコードからこれを受け取りました:", receivedData); // [1]
     if (receivedData.type === 'EXPORT_REQUEST') {
 
+      exportFile(receivedData.convertedData);
       const convertedData = receivedData.convertedData;
-
-      // データをBlobとして作成し、ダウンロードリンクを生成します。
-        // （ブラウザAPIはこの iframe 内でのみ利用可能です [1]）
-        const blob = new Blob([convertedData], { type: 'application/xml' });
-        const url = URL.createObjectURL(blob);
-        
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'exported_nodes.xml';
-        
-        // 仮想的なクリックイベントを発火させ、ダウンロードをトリガー
-        a.click();
         
         // ダウンロードが開始されたら、メインスレッドに完了を通知し、
-        // プラグインを閉じるよう指示します (parent.postMessage を使用) [6]。
+        // プラグインを閉じるよう指示します (parent.postMessage を使用)。
         parent.postMessage({ pluginMessage: { type: 'EXPORT_RESPONSE' } }, '*');
+    }
+    else if (receivedData.type === 'COPY_REQUEST') {
+      copyToClipboard(receivedData.convertedData);
     }
     else if (receivedData.type === 'selectionChanged') {
       document.getElementById('sel-num').textContent = `num selected nodes: ${receivedData.num}`;
+      document.getElementById('textarea').value = receivedData.convertedData;
     }
-   
 };
 
 </script>

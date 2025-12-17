@@ -13,6 +13,13 @@ figma.showUI(__html__);
 
 let exportData: any[];
 let rootData:any;
+let xmlString: String;
+const converter = new XMLBuilder({
+    processEntities:false,
+    format: true,
+    ignoreAttributes: false,
+    // commentPropName: "comment"
+});
 
 function updateSelection()
 {
@@ -23,18 +30,19 @@ function updateSelection()
         if ('x' in node && 'width' in node) {
             exportData.push({node: 
               {
-                "name": node.name,
-                "type": node.type,
-                "x": node.x,
-                "y": node.y,
-                "width": node.width,
-                "height": node.height
+                "@_name": node.name,
+                "@_type": node.type,
+                "@_x": node.x,
+                "@_y": node.y,
+                "@_width": node.width,
+                "@_height": node.height
             }
             });
         }
     }
     rootData = {"root": exportData};
-    figma.ui.postMessage({ type: 'selectionChanged', num: selection.length});
+    xmlString = converter.build(rootData);
+    figma.ui.postMessage({ type: 'selectionChanged', num: selection.length, convertedData: xmlString});
 }
 updateSelection();
 
@@ -45,15 +53,11 @@ figma.on("selectionchange", () => {
 // message from ui
 figma.ui.onmessage =  (msg: {type: string}) => {
   if (msg.type === 'export') {
-    const converter = new XMLBuilder({
-        processEntities:false,
-        format: true,
-        ignoreAttributes: false,
-        // commentPropName: "comment"
-    });
-    const xmlString = converter.build(rootData);
     figma.ui.postMessage({ type: 'EXPORT_REQUEST', convertedData: xmlString });
   } 
+  else if (msg.type === 'copy') {
+    figma.ui.postMessage({ type: 'COPY_REQUEST', convertedData: xmlString });
+  }
   else if (msg.type === 'EXPORT_RESPONSE') {
     console.log("exported.");
     figma.closePlugin();
