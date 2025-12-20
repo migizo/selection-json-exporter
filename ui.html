@@ -24,7 +24,7 @@ document.getElementById('copy').onclick = () => {
 }
 
 document.getElementById('cancel').onclick = () => {
-  parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
+  parent.postMessage({ pluginMessage: { type: 'quit' } }, '*')
 }
 
 function copyToClipboard(str)
@@ -55,19 +55,17 @@ window.onmessage = (event) => {
     const receivedData = event.data.pluginMessage; 
     
     // console.log("プラグインコードからこれを受け取りました:", receivedData); // [1]
-    if (receivedData.type === 'EXPORT_REQUEST') {
+    if (receivedData.type === 'EXPORT') {
 
       exportFile(receivedData.convertedData);
       const convertedData = receivedData.convertedData;
         
-        // ダウンロードが開始されたら、メインスレッドに完了を通知し、
-        // プラグインを閉じるよう指示します (parent.postMessage を使用)。
-        parent.postMessage({ pluginMessage: { type: 'EXPORT_RESPONSE' } }, '*');
+      parent.postMessage({ pluginMessage: { type: 'response' } }, '*');
     }
-    else if (receivedData.type === 'COPY_REQUEST') {
+    else if (receivedData.type === 'COPY') {
       copyToClipboard(receivedData.convertedData);
     }
-    else if (receivedData.type === 'selectionChanged') {
+    else if (receivedData.type === 'UPDATE_SELECTION') {
       document.getElementById('sel-num').textContent = `num selected nodes: ${receivedData.num}`;
       document.getElementById('textarea').value = receivedData.convertedData;
     }
