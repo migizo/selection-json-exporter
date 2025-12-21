@@ -12,7 +12,7 @@ function pickGradientColors(stops: readonly ColorStop[]) {
     };
 }
 
-function convertPaint(paint: Paint, prefix: string) {
+export function convertPaint(paint: Paint, prefix: string) {
     const props: any = {};
     // props["alpha"]
     switch (paint.type) {
@@ -37,6 +37,8 @@ function convertPaint(paint: Paint, prefix: string) {
             break;
         case "IMAGE":
             props[`${prefix}img_src`] = paint.imageHash; // TODO: IDしか取れないので対処
+            // let image = figma.getImageByHash(paint.imageHash!); // バイナリしか参照できない。
+            // node名と同じという前提にしてもいいかもしれない->共通使用されている可能性もあるのでID文字列の方が無難かも
             break;
     }
     return props;
@@ -46,7 +48,7 @@ export function convertAppearanceProps(node: SceneNode) {
     const props: any = {};
     if ("fills" in node && node.fills !== figma.mixed) {
         for (const fill of node.fills) {
-            Object.assign(props, convertPaint(fill, "bg_"));
+            Object.assign(props, convertPaint(fill, node.type == "TEXT" ? "text_" : "bg_"));
         }
     }
     if ("strokes" in node) {

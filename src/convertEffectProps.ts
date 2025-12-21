@@ -22,7 +22,7 @@ function convertBlur(effect: Effect, prefix: string) {
     return props;
 }
 
-function convertEffect(effect: Effect) {
+export function convertEffect(effect: Effect) {
     switch (effect.type) {
         case "DROP_SHADOW":
             return convertShadow(effect, "");
