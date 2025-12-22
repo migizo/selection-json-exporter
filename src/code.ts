@@ -57,6 +57,7 @@ async function convertRoot()
     nodeTree.push(tmpNode);
   }
 
+  await figma.loadAllPagesAsync();
   let styles = await convertStylesAsync();
   let components = await convertComponentsAsync();
   
